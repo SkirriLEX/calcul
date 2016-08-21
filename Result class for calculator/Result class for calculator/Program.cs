@@ -15,22 +15,48 @@ namespace Result_class_for_calculator
             Line = Console.ReadLine();
             //mathematic_line math = new mathematic_line();
             //Console.WriteLine("Answer = " + math.Result(Line));
-            string[] mass = Line.Split(new char[] { ' ', '\n', '\t' },StringSplitOptions.RemoveEmptyEntries); 
-            for (int i=0;i< mass.Length;i++)
-            {
-                Console.Write("{0}) - {1} \n", i, mass[i]);
-                //Line += mass[i];
-            }
+            Console.WriteLine(LineValidat(ref Line));
             Console.WriteLine(Line);
             Console.ReadKey();
         }
-        public bool LineValidat (string str,ref string Cstr)//проверка коректности ввода
+        public static string LineValidat (ref string Cstr)//проверка коректности ввода
         {
-            if (str.IndexOf(' ')>0||str.IndexOf('\n')>0|| str.IndexOf('\t') > 0)
+            string[] mass;
+            string answer = "wse OK"; 
+            if (Cstr.IndexOf(' ')>-1||Cstr.IndexOf('\n')>-1|| Cstr.IndexOf('\t') > -1)
             {
-                string[] mass = str.Split(new char[] { ' ', '\n', '\t' });
+                mass = Cstr.Split(new char[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                Cstr = mass[0];
+                for (int i =1;i<mass.Length;i++)
+                {
+                    Cstr += mass[i];
+                }
+                answer += "1";
             }
-            return true;
+            mass = Cstr.Split(new char[] { '1', '2', '3','4','5','6','7','8','9','0','+','(',')','-','*','/',',','.'}, StringSplitOptions.RemoveEmptyEntries);
+            if (mass.Length>0)
+            {
+                for (int i=0;i<0;i++)
+                {
+                    Cstr = Cstr.Remove(Cstr.IndexOf(mass[i]), mass[i].Length);
+                }
+                answer += "2";
+            }
+            if (Cstr.IndexOf(".")>-1)
+            {
+                Cstr = Cstr.Replace(".", ",");
+                answer += "3";
+            }
+            if (!(answer == "wse OK"))
+            {
+                answer = answer.Replace("wse OK","This line has problem with ");
+                answer = answer.Replace("1", "other space");
+                answer += (answer.IndexOf("other") > -1)&& (answer.IndexOf("2")>-1||answer.IndexOf("3")>-1)? ", " : "";
+                answer = answer.Replace("2", "other word");
+                answer += (answer.IndexOf("other word")>-1 && answer.IndexOf("3") > -1)? ", ": "";
+                answer = answer.Replace("3", "point");
+            }
+            return answer;
         }
     }
     class mathematic_line// класс для расчета сирокового уравнения
