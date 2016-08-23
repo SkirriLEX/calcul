@@ -8,24 +8,30 @@ namespace Result_class_for_calculator
       {
          Console.WriteLine("write in me string");
          string Line;//основная строка (которую вводим мы)
-         Line=Console.ReadLine();
-         string errors = LineValidat(ref Line);
-         Console.WriteLine("Error = "+errors);
-         //mathematic_line math = new mathematic_line();
-         //Console.WriteLine("Answer = "+math.Result(Line));
-         Console.WriteLine("Line = "+Line);
+         Line=Console.ReadLine();//читаемм строку с клавиатуры
+         mathematic_line math = new mathematic_line();//иницыализируем наш класс
+         string errors = mathematic_line.LineValidat(ref Line);//проверяем ошибки
+         if(errors!="wse OK")//если все не ок тогда виводим что изменилось
+         {
+            Console.WriteLine("Error = "+errors);
+            Console.WriteLine("Line = "+Line);
+         }
+         Console.WriteLine("Answer = "+math.Result(Line));
          Console.ReadKey();
-      }
+      }      
+   }
+   class mathematic_line// класс для расчета сирокового уравнения
+   {
       public static string LineValidat(ref string Cstr)//проверка коректности ввода
       {
          string[] mass;
          string answer = "wse OK";
          //--------------проверка пробелов------------------------
-         if (Cstr.IndexOf(' ')>-1||Cstr.IndexOf('\n')>-1||Cstr.IndexOf('\t')>-1)
+         if(Cstr.IndexOf(' ')>-1||Cstr.IndexOf('\n')>-1||Cstr.IndexOf('\t')>-1)
          {
             mass=Cstr.Split(new char[] { ' ','\n','\t' },StringSplitOptions.RemoveEmptyEntries);
             Cstr=mass[0];
-            for (int i = 1;i<mass.Length;i++)
+            for(int i = 1;i<mass.Length;i++)
             {
                Cstr+=mass[i];
             }
@@ -33,40 +39,40 @@ namespace Result_class_for_calculator
          }
          //--------------проверка символов------------------------
          mass=Cstr.Split(new char[] { '1','2','3','4','5','6','7','8','9','0','+','(',')','-','*','/',',','.' },StringSplitOptions.RemoveEmptyEntries);
-         if (mass.Length>0)
+         if(mass.Length>0)
          {
-            for (int i = 0;i<mass.Length;i++)
+            for(int i = 0;i<mass.Length;i++)
             {
                Cstr=Cstr.Remove(Cstr.IndexOf(mass[i]),mass[i].Length);
             }
             answer+="2";
          }
-         if (Cstr.IndexOf(".")>-1)
+         if(Cstr.IndexOf(".")>-1)
          {
             Cstr=Cstr.Replace(".",",");
             answer+="3";
          }
          //--------------проверка дужок----------------------------
          int amounth =0;//счетсик количества дужок
-         for (int i=0;i<Cstr.Length;i++)//цыкл проверки дужок 
+         for(int i = 0;i<Cstr.Length;i++)//цыкл проверки дужок 
          {
-            if (Cstr[i]=='(')
+            if(Cstr[i]=='(')
                amounth++;
-            if (Cstr[i]==')')
+            if(Cstr[i]==')')
                amounth--;
-            if (amounth<0)
+            if(amounth<0)
                break;
          }
-         if (amounth!=0)//значения для расширеного вывода
+         if(amounth!=0)//значения для расширеного вывода
             answer+="4";
          //--------------расширеный вывод---------------------------
-         if(!(answer=="wse OK"))//расширеный вивод ошибки проверки
+         if(answer!="wse OK")//расширеный вивод ошибки проверки
          {
             answer=answer.Replace("wse OK","This line has problem with ");
             answer=answer.Replace("1","other space");
             answer=answer.Replace("2",((answer.IndexOf("other")>-1)&&(answer.IndexOf("2")>-1||answer.IndexOf("3")>-1||answer.IndexOf("4")>-1) ? "," : "")+" other symbol");
             answer=answer.Replace("3",((answer.IndexOf("other")>-1&&(answer.IndexOf("3")>-1||answer.IndexOf("4")>-1)) ? "," : "")+" point");
-            answer=answer.Replace("4",((answer.IndexOf("other")>-1&&answer.IndexOf("4")>-1) ? "," : "" )+" bracket");
+            answer=answer.Replace("4",((answer.IndexOf("other")>-1&&answer.IndexOf("4")>-1) ? "," : "")+" bracket");
             /*
             проблема с:
             1-пробелом
@@ -78,9 +84,6 @@ namespace Result_class_for_calculator
          }
          return answer;
       }
-   }
-   class mathematic_line// класс для расчета сирокового уравнения
-   {
       public string Result(string str)
       {
          string Answer = "";
