@@ -10,22 +10,23 @@ namespace Result_class_for_calculator
          string Line;//основная строка (которую вводим мы)
          Line=Console.ReadLine();//читаемм строку с клавиатуры
          mathematic_line math = new mathematic_line();//иницыализируем наш класс
-         string errors = mathematic_line.LineValidat(ref Line);//проверяем ошибки
+         string errors = math.LineValidat(ref Line);//проверяем ошибки
          if(errors!="wse OK")//если все не ок тогда виводим что изменилось
          {
             Console.WriteLine("Error = "+errors);
             Console.WriteLine("Line = "+Line);
          }
+         else 
          Console.WriteLine("Answer = "+math.Result(Line));
          Console.ReadKey();
       }      
    }
    class mathematic_line// класс для расчета сирокового уравнения
    {
-      public static string LineValidat(ref string Cstr)//проверка коректности ввода
+      public string LineValidat(ref string Cstr)//проверка коректности ввода
       {
-         string[] mass;
-         string answer = "wse OK";
+         string[] mass;//масив для проверок
+         string answer = "wse OK";//наш ответ в конце метода 
          //--------------проверка пробелов------------------------
          if(Cstr.IndexOf(' ')>-1||Cstr.IndexOf('\n')>-1||Cstr.IndexOf('\t')>-1)
          {
@@ -54,7 +55,8 @@ namespace Result_class_for_calculator
          }
          //--------------проверка дужок----------------------------
          int amounth =0;//счетсик количества дужок
-         for(int i = 0;i<Cstr.Length;i++)//цыкл проверки дужок 
+         Cstr=Cstr.Replace("()","");
+            for(int i = 0;i<Cstr.Length;i++)//цыкл проверки дужок 
          {
             if(Cstr[i]=='(')
                amounth++;
@@ -65,6 +67,15 @@ namespace Result_class_for_calculator
          }
          if(amounth!=0)//значения для расширеного вывода
             answer+="4";
+         //--------------
+         if(Cstr.IndexOf(",")>-1)
+         {
+            for(int i = Cstr.IndexOf(",");i<Cstr.Length;i++)
+            {
+
+
+            }
+         }
          //--------------расширеный вывод---------------------------
          if(answer!="wse OK")//расширеный вивод ошибки проверки
          {
@@ -86,68 +97,62 @@ namespace Result_class_for_calculator
       }
       public string Result(string str)
       {
-         string Answer = "";
-         string Numbers;
-         bool check = false;
-         Console.WriteLine(str);
-         string[] num = str.Split(new char[] { '+', '-', '/', '*' }, StringSplitOptions.RemoveEmptyEntries);// стераем все лишнее кроме цыафер
-         if (num.Length>1)//проверка не состоит ли наша очищеная строчка из одного числа
+         string Symbol="";//символ текущего действия 
+         //Console.WriteLine("-->"+str);//просто проверка --> входящее значение
+         //----------------------работа с дужками------------------
+         int amounth =0;//счетсик количества дужок
+         int StartIndex=-1;//индекс дужок
+         for(int i = 0;i<str.Length;i++)
          {
-            if ((str.IndexOf("*"))>-1)//проверка на наличие в строке умножения
+            if(str[i]=='(')
             {
-               for (int i = 0;i<num.Length-1;i++)
-               {
-                  string g = num[i] + "*" + num[i + 1];//строчка умножкния
-                  if (str.IndexOf(g)>-1)
-                  {
-                     Answer=calc("*",num[i],num[i+1],false);
-                     str=str.Replace(g,rev(Answer));
-                     str=Result(str);
-                     break;
-                  }
-               }
+               amounth++;
+               if(StartIndex==-1)
+                  StartIndex=i;
             }
-            if ((str.IndexOf("/"))>-1)
+            if(str[i]==')')
+               amounth--;
+            if(amounth==0&&StartIndex!=-1)
             {
-               for (int i = 0;i<num.Length-1;i++)
-               {
-                  string g = num[i] + "/" + num[i + 1];//строчка умножкния
-                  if (str.IndexOf(g)>-1)
-                  {
-                     Answer=calc("/",num[i],num[i+1],false);
-                     str=str.Replace(g,Answer);
-                     str=Result(str);
-                  }
-               }
+               str=str.Replace(str.Substring(StartIndex,i-StartIndex+1),Result(str.Substring(StartIndex+1,i-StartIndex-1)));
+               StartIndex=-1;
             }
-            if ((str.IndexOf("+"))>-1)
-            {
-               for (int i = 0;i<num.Length-1;i++)
-               {
-                  string g = num[i] + "+" + num[i + 1];//строчка умножкния
-                  if (str.IndexOf(g)>-1)
-                  {
-                     Answer=calc("+",num[i],num[i+1],false);
-                     str=str.Replace(g,rev(Answer));
-                     str=Result(str);
-                  }
-               }
-            }
-            if ((str.IndexOf("-"))>-1)
-            {
-               for (int i = 0;i<num.Length-1;i++)
-               {
-                  string g = num[i] + "-" + num[i + 1];//строчка умножкния
-                  if (str.IndexOf(g)>-1)
-                  {
-                     Answer=calc("-",num[i],num[i+1],false);
-                     str=str.Replace(g,rev(Answer));
-                     str=Result(str);
-                  }
-               }
-            }
-
          }
+         //--------------------работа с алгебраическими действиями--- 
+         for(int symb = 0;symb<4;symb++)
+         {
+            switch(symb)
+            {
+               case 0:
+                  Symbol="*";
+                  break;
+               case 1:
+                  Symbol="/";
+                  break;
+               case 2:
+                  Symbol="+";
+                  break;
+               case 3:
+                  Symbol="!";
+                  break;
+            }
+            str=str.Replace("-","!-");//ставим знаки возле отнимания
+            if(str[0]=='+') str.Remove(0,1);
+            while((str.IndexOf(Symbol))>-1)//проверка на наличие в строке умножения
+            {
+               string [] num=str.Split(new char[] { '+','!','/','*' },StringSplitOptions.RemoveEmptyEntries);// стераем все лишнее кроме цыфер
+               for(int i = 0;i<num.Length-1;i++)
+               {
+                  string g = num[i] + (Symbol=="!"?"!":Symbol)+ num[i + 1];//строчка умножкния
+                  if(str.IndexOf(g)>-1)
+                  {
+                     str=str.Replace(g,rev(calc(Symbol=="!"?"+":Symbol,num[i],num[i+1],false)));
+                  }
+               }
+            }
+            str=str.Replace("!","");//стераем прошлые метки
+         }
+         //Console.WriteLine("<--"+str);//просто проверка <-- выходящее значение
          return str;
       }
       private string calc(string action,string num1,string num2,bool divisibility)
@@ -238,32 +243,54 @@ namespace Result_class_for_calculator
          }
          else if (action=="+")
          {
-            if (num1.Length>num2.Length)
+            if(num1[0]=='-'||num2[0]=='-')
             {
-               int test = num1.Length - num2.Length;
-               for (int i = 0;i<test;i++)
-                  num2="0"+num2;
+               if(num1[0]=='-'&&num2[0]=='-')
+               {
+                  num1.Remove(0,1);
+                  num2.Remove(0,1);
+                  answer=calc("+",num1,num2,false)+"-";
+               }
+               else if(num1[0]=='-')
+               {
+                  num1 = num1.Remove(0,1);
+                  answer=calc("-",num1,num2,false);
+               }
+               else
+               {
+                  num2 =  num2.Remove(0,1);
+                  answer=calc("-",num1,num2,false);
+               }
             }
-            else if (num1.Length<num2.Length)
+            else
             {
-               int test = num2.Length - num1.Length;
-               for (int i = 0;i<test;i++)
-                  num1="0"+num1;
-            }
-            for (int i = num1.Length-1;i>-1;i--)
-            {
-               Smtmvr=((Convert.ToInt32(num1[i])-48)+(Convert.ToInt32(num2[i])-48))+SomeTemp;
-               answer+=Convert.ToString(Smtmvr%10);
-               SomeTemp=Smtmvr/10;
-               if (i==0&&SomeTemp>0)
-                  answer+=SomeTemp;
+               if(num1.Length>num2.Length)
+               {
+                  int test = num1.Length - num2.Length;
+                  for(int i = 0;i<test;i++)
+                     num2="0"+num2;
+               }
+               else if(num1.Length<num2.Length)
+               {
+                  int test = num2.Length - num1.Length;
+                  for(int i = 0;i<test;i++)
+                     num1="0"+num1;
+               }
+               for(int i = num1.Length-1;i>-1;i--)
+               {
+                  Smtmvr=((Convert.ToInt32(num1[i])-48)+(Convert.ToInt32(num2[i])-48))+SomeTemp;
+                  answer+=Convert.ToString(Smtmvr%10);
+                  SomeTemp=Smtmvr/10;//узнаем осталось ли десятичное число
+                  if(i==0&&SomeTemp>0)//елси в конце подсчета у нас остался перенос на верхий регистр то переносим
+                     answer+=SomeTemp;
+               }
             }
          }
          else if (action=="-")
          {
             int a = num1.Length, b = num2.Length;
             string znak = "";
-            if (a>b)
+            if (a>b)//проверяем на глаз какое чило больше 
             {
                int test = a - b;
                for (int i = 0;i<test;i++)
@@ -274,23 +301,24 @@ namespace Result_class_for_calculator
                int test = b - a;
                for (int i = 0;i<test;i++)
                   num1="0"+num1;
-               if (!Compare(num1,num2))
-               {
+               if (!Compare(num1,num2)) //если они ровни на глаз то проверяем детальней
+               {//если а больше чем b то оставляем а если наоборот то меняем местами для удобности подсчета
                   string ffo = num1;
                   num1=num2;
                   num2=ffo;
                   znak="-";
                }
             }
-            for (int i = num1.Length-1;i>-1;i--)
+            for (int i = num1.Length-1;i>-1;i--)//сам цыкл отнимания 
             {
                Smtmvr=(Convert.ToInt32(num1[i])-48)-(Convert.ToInt32(num2[i])-48)+SomeTemp;
-               if (Smtmvr<0)
+               if (Smtmvr<0)//если остача отрицательная запоминаем это
                   SomeTemp=-1;
                else
                   SomeTemp=0;
                answer+=(Smtmvr<0 ? (10+Smtmvr) : Smtmvr);
             }
+           //стерания не нужных нулей после отнимания
             int QuaOfNull = 0;
             for (int i = answer.Length-1;i>-1;i--)
             {
@@ -306,13 +334,13 @@ namespace Result_class_for_calculator
          }
          return answer;
       }
-      private string rev(string str)
+      private string rev(string str)//переворот числа
       {
          char[] arr = str.ToCharArray();
          Array.Reverse(arr);
          return new string(arr);
       }
-      private bool Compare(string a,string b)
+      private bool Compare(string a,string b)//метод для определениия какое число больше
       {
          if (a.Length>b.Length)
             return true;
@@ -325,7 +353,7 @@ namespace Result_class_for_calculator
             else if ((Convert.ToInt32(a[i])-48)<(Convert.ToInt32(b[i])-48))
                return false;
          }
-         return true;
+         return true;//возвращает true если а и false если b
       }
       //string
       //point
